@@ -1,1 +1,22 @@
-
+%comparer plusieurs cavités d'acces réalisés sur paint 3D (ou les entrées canalaires sont coloriées en vert) puis converties
+%au format ply (la matrice centcanals définit le centre des points coloriés
+%pour définir les entrées canalaires
+ptCloud = plyread('test1b.ply');%insérer ici le fichier à comparer
+[Tri,Pts] = plyread('test1b.ply','tri');
+gr=double(ptCloud.vertex.green>200);%concerver uniquement les zones ou couleur verte (de plus de 220 (on s'attend à rouge15 vert220 et bleu 100)
+ccol=[Pts gr];
+scatter3(ccol(:,1), ccol(:,2), ccol(:,3), 15, ccol(:,4), 'filled');
+%idx = kmeans(ccol,4) ;
+ccol2=ccol(ccol(:,4)==1,:);
+idx = kmeans(ccol2,4) ;
+idx2 = dbscan(ccol2,0.01,15);
+ccol2(:,4)=idx2;
+figure();scatter3(ccol2(:,1), ccol2(:,2), ccol2(:,3), 15, idx2, 'filled');
+nbcanals=unique(idx2);
+centcanals=[];
+for i=1:length(nbcanals)
+    centcanals(i,1)=mean(ccol2(ccol2(:,4)==nbcanals(i),1));
+    centcanals(i,2)=mean(ccol2(ccol2(:,4)==nbcanals(i),2));
+    centcanals(i,3)=mean(ccol2(ccol2(:,4)==nbcanals(i),3));
+end
+hold on;scatter3(centcanals(:,1),centcanals(:,2), centcanals(:,3), 30, 'filled');
